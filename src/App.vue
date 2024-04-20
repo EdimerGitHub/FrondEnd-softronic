@@ -1,26 +1,84 @@
 <template>
-  <div id="app" class="app">
-    <div class="header">
-      <h1>Banco UN</h1>
-      <nav>
-        <button v-if="is_auth" > Inicio </button>
-        <button v-if="is_auth" > Cuenta </button>
-        <button v-if="is_auth" > Cerrar Sesión </button>
-        <button v-if="!is_auth" v-on:click="loadLogIn" > Iniciar Sesión </button>
-        <button v-if="!is_auth" v-on:click="loadSignUp" > Registrarse </button>
-      </nav>
+  <div id="app" class="app m-0">
+    <div class="header mb-0" v-if="is_auth">
+
+      <nav class="navbar navbar-expand-lg  mb-0 bg-primary">
+
+        <div class="container-fluid">
+
+            <a class="navbar-brand text-white" href="#" >Menu</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar1" aria-controls="navbar1" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbar1">
+
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+                    <li class="nav-item dropdown" >
+                        <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" aria-current="page">
+                            Gestion de usuarios
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" v-on:click="loadHome">Inicio</a></li>
+                            <li><a class="dropdown-item" href="#" v-on:click="loadSignUp">Crear nuevo usuario</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item dropdown" >
+                        <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" aria-current="page">
+                            Gestion administrativa
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Inicio</a></li>
+                            <li><a class="dropdown-item" href="#">Buscar dispositivo</a></li>
+                            <li><a class="dropdown-item" href="#">Ingresar nuevo</a></li>
+                            <li><a class="dropdown-item" href="#">Diagnosticos</a></li>
+                            <li><a class="dropdown-item" href="#">Reparaciones</a></li>
+                            <li><a class="dropdown-item" href="#">Facturas</a></li>
+                            <li><a class="dropdown-item" href="#">Clientes</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item dropdown" >
+                        <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" aria-current="page">
+                            Gestion tecnica
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Inicio</a></li>
+                            <li><a class="dropdown-item" href="#" >Buscar Diagnosticos y reparaciones</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item" >
+                      <a class="nav-link text-white" href="#" v-on:click="loadAccount">Cuenta de usuario</a>
+                    </li>
+
+                    <li class="nav-item" >
+                      <a class="nav-link text-white" href="#" v-on:click="logOut">Salir</a>
+                    </li>
+
+                </ul>
+
+            </div>
+
+        </div>
+
+      </nav> 
+
     </div>
 
     <div class="main-component">
       <router-view
         v-on:completedLogIn="completedLogIn"
         v-on:completedSignUp="completedSignUp"
+        v-on:logOut="logOut"
       >
       </router-view>
     </div>
 
-    <div class="footer">
-      <h2>Misión TIC 2022</h2>
+    <div class="bg-dark bg-gradient text-center text-white">
+      <h6 class="m-0 p-0">Copyright © 2024 SOFTRONIC </h6>
     </div>
   </div>
 </template>
@@ -40,8 +98,11 @@
 
     methods:{
       verifyAuth: function() {
-        if(this.is_auth == false)
-          this.$router.push({name: "logIn"})
+        this.is_auth = localStorage.getItem("isAuth") || false;
+        if (this.is_auth == false)
+          this.$router.push({ name: "logIn" });
+        else
+          this.$router.push({ name: "home" });
       },
       loadLogIn: function(){
         this.$router.push({name: "logIn"})
@@ -49,8 +110,30 @@
       loadSignUp: function(){
         this.$router.push({name: "signUp"})
       },
-      completedLogIn: function(data) {},
-      completedSignUp: function(data) {},
+      completedLogIn: function(data) {
+        localStorage.setItem("isAuth", true);
+        localStorage.setItem("username", data.username);
+        localStorage.setItem("rol", data.rol);
+        localStorage.setItem("token_access", data.token_access);
+        localStorage.setItem("token_refresh", data.token_refresh);
+        alert("Autenticación Exitosa");
+        this.verifyAuth();
+      },
+      completedSignUp: function(data) {
+        alert("Registro Exitoso");
+        //this.completedLogIn(data);       
+      },
+      loadHome: function() {
+        this.$router.push({ name: "home" });
+      },
+      logOut: function () {
+        localStorage.clear();
+        alert("Sesión Cerrada");
+        this.verifyAuth();
+      },
+      loadAccount: function () {
+        this.$router.push({ name: "account" });
+      },
     },
 
     created: function(){
@@ -60,73 +143,5 @@
 </script>
 
 <style>
-  body{
-    margin: 0 0 0 0;
-  }
 
-  .header{
-    margin: 0%;
-    padding: 0;
-    width: 100%;
-    height: 10vh;
-    min-height: 100px;
-    background-color: #283747 ;
-    color:#E5E7E9 ;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .header h1{
-    width: 20%;
-    text-align: center;
-  }
-
-  .header nav{
-    height: 100%;
-    width: 20%;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    font-size: 20px;
-  }
-
-  .header nav button{
-    color: #E5E7E9;
-    background: #283747;
-    border: 1px solid #E5E7E9;
-    border-radius: 5px;
-    padding: 10px 20px;
-  }
-
-  .header nav button:hover{
-    color: #283747;
-    background: #E5E7E9;
-    border: 1px solid #E5E7E9;
-  }
-
-  .main-component{
-    height: 75vh;
-    margin: 0%;
-    padding: 0%;
-    background: #FDFEFE;
-  }
-
-  .footer{
-    margin:0;
-    padding:0;
-    width: 100%;
-    height: 10vh;
-    min-height: 100px;
-    background-color: #283747;
-    color: #E5E7E9;
-  }
-
-  .footer h2{
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
 </style>
